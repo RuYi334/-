@@ -1,0 +1,72 @@
+#妯″潡宸茬粡杩囩紪璇戯紝杩愯鑴氭湰鑷姩閲婃斁瀹夎
+NAME="v1.0.0";VERSION="202203280"
+echo "鈥斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€? Magisk Module Online Script
+     $NAME ($VERSION)
+鈥斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€斺€?      浣滆€咃細鏃堕洦馃寣鏄熺┖
+
+- 姝ｅ湪璁剧疆鐜
+";abort(){ rm -rf "$MODPATH";echo "
+! $@";exit 1;}
+offline(){ echo "
+  褰撳墠鏃堕棿锛?DATE
+  鑴氭湰璺緞锛?MODFILE$([ -n "$*" ]&&echo "
+  闄勫姞鍙傛暟锛?*")
+  璁惧浠ｅ彿锛?(getprop ro.product.device)
+  璁惧鍨嬪彿锛?(getprop ro.product.marketname)
+  璁よ瘉鍨嬪彿锛?(getprop ro.product.model)
+  瀹夊崜鐗堟湰锛?(getprop ro.build.version.release) (SDK $(getprop ro.build.version.sdk))
+  绯荤粺鐗堟湰锛?(getprop ro.build.version.incremental)
+  鏇存柊鏃堕棿锛?(date -d "@$(getprop ro.build.date.utc)" "+%F %X")
+  鍐呮牳鐗堟湰锛?(uname -r)
+  闈㈠叿鐗堟湰锛?(magisk -c)
+
+  妯″潡浠ｅ彿锛?MODID
+  妯″潡鍚嶇О锛?MODNAME
+  妯″潡鐗堟湰锛?MODVER
+  妯″潡鐗堝彿锛?MODVERC
+  妯″潡浣滆€咃細$MODAU
+  妯″潡浠嬬粛锛?MODDESC
+  鎵撳寘鏃堕棿锛?PACKDATE
+
+- 姝ｅ湪閲婃斁妯″潡
+";MODPATH="/data/adb/modules_update/$MODID";MODDIR="/data/adb/modules/$MODID";[ -d "$MODPATH" ]&&rm -rf "$MODPATH";mkdir -p "$MODPATH";tail -n "+$(awk "/$(echo "5a6a5L2N56ym"|base64 -d)/{print NR+1}" "$MODFILE"|head -n 1)" "$MODFILE"|xzcat|tar -xvC "$MODPATH"||abort "妯″潡閲婃斁澶辫触";echo "
+- 姝ｅ湪鏍￠獙妯″潡
+";sh "$MODPATH/verify.sh" "$MODPATH"||abort "妯″潡鏍￠獙澶辫触";[ ! -d "$MODDIR" ]&&mkdir -p "$MODDIR";cp -rf "$MODPATH/module.prop" "$MODDIR";touch "$MODDIR/update";echo "
+- 姝ｅ湪鎵ц瀹夎鑴氭湰
+";. "$MODPATH/install.sh"||abort "瀹夎鑴氭湰鎵ц澶辫触";echo "
+- 妯″潡瀹夎瀹屾垚锛岀敤鏃讹細$(expr "$(date +%s)" - "$(date -d "$DATE" +%s)")绉?;exit;}
+abort_update(){ echo "
+! $@";[ "$N" -lt "8" ]&&{ let N++;download;}||{ echo "
+! 鑴氭湰涓嬭浇澶辫触锛屼娇鐢ㄧ绾跨増鏈?;offline;};}
+download(){ case "$N" in
+  "1")SERVER="GitHub";URL="https://raw.githubusercontent.com/TimeRainStarSky/MMPack/online";;
+  "2")SERVER="Gitee";URL="https://gitee.com/TimeRainStarSky/MMPack/raw/online";;
+  "3")SERVER="Gitle";URL="http://qd2lg.nbxianyuyun.cn:3000/TimeRainStarSky/MMPack/raw/branch/online";;
+  "4")SERVER="GitLab";URL="https://gitlab.com/TimeRainStarSky/MMPack/raw/online";;
+  "5")SERVER="Coding";URL="https://trss.coding.net/p/MMPack/d/MMPack/git/raw/online";;
+  "6")SERVER="Aliyun";URL="https://code.aliyun.com/TimeRainStarSky/MMPack/raw/online";;
+  "7")SERVER="Bitbucket";URL="https://bitbucket.org/TimeRainStarSky/MMPack/raw/online";;
+  "8")SERVER="Jsdelivr";URL="https://cdn.jsdelivr.net/gh/TimeRainStarSky/MMPack@online"
+  esac;echo "
+  姝ｅ湪浠?$SERVER 鏈嶅姟鍣?涓嬭浇鐗堟湰淇℃伅";eval geturl "$URL/version"||abort_update "涓嬭浇澶辫触";NEW="$(sed -n s/^version=//p version)";NEWNAME="$(sed -n s/^name=//p version)";MD5="$(sed -n s/^md5=//p version)";rm -rf version;[ -n "$NEW" ]&&[ -n "$NEWNAME" ]&&[ -n "$MD5" ]||abort_update "涓嬭浇鏂囦欢鐗堟湰淇℃伅缂哄け";echo "
+  鏈€鏂扮増鏈細$NEWNAME ($NEW)
+
+  寮€濮嬩笅杞?;eval geturl "$URL/MMExtract.sh"||abort_update "涓嬭浇澶辫触";[ "$(md5sum "MMExtract.sh"|head -c 32)" != "$MD5" ]&&abort_update "涓嬭浇鏂囦欢鏍￠獙閿欒";echo "
+- 鑴氭湰涓嬭浇瀹屾垚锛屽紑濮嬫墽琛?;sh "MMExtract.sh"||abort_update "鎵ц涓嬭浇鏂囦欢澶辫触";exit;}
+update(){ echo "- 姝ｅ湪涓嬭浇鍦ㄧ嚎鑴氭湰";if command -v curl>/dev/null;then alias geturl="curl --retry 2 --connect-timeout 5 -O";elif command -v wget>/dev/null;then alias geturl="wget -T 5 --no-check-certificate";else echo "! 鎵句笉鍒版洿鏂板懡浠わ紝浣跨敤绂荤嚎鐗堟湰";offline;fi;N=1;download;}
+export DIR="/data/adb/TimeRainStarSky/MMOnline";export DATE="$(date "+%F %X")";export MODFILE="$(realpath "$0")";cd "$(dirname "$MODFILE")"||abort "鍒囨崲鍒拌剼鏈洰褰曞け璐?;export MODTYPE=;export MODID="Hcfile_sharing";export MODNAME="MAT - 鐩綍瀹氬悜鎸傝浇";export MODVER="v1";export MODVERC="1";export MODAU="鏃堕洦馃寣鏄熺┖";export MODDESC="鍦ㄧ嚎瀹夎妯″潡";export PACKDATE="2022-03-29 20:05:13";[ -f "$DIR/MMOnline.sh" ]&&sh "$DIR/MMOnline.sh" "$@"||update;exit;瀹氫綅绗??zXZ  嬷碏 !   蟈锑'筣 4泭????鞃鉙幂?弰澲 線褳?Fq#抛軞D2?貞{=噅m"?堉?倆)?鏫 Z電魗E?邨?佄8a埵3槂趭基.明b
+;爑^+榷{?M?懧nxL??O?V峄⑽4?{琥嬶忙I緍Twt.胂.d{?-B?鹆?焣T吻萖鈢d碲×?S軔闳w? ?nV﹃?:EJS穧w3耱熡~駫=?徻M薧枪Q"_a齲桙1,? 毠L??h?嶟?>
+l逢T鰫?橲拋?fi议?
+l.b曛6扨{?vJ?胝~~?浱?勸W頣?*嶺銆?I唠??^齺鐝撝矯?D;誢鵈翥骭哴印掂-)+垴8?tO?藮徃韮汒 壩綌帒7?9柠lC?釜?谙慼6;锑葢?舮?蛁锳??儵?轓ｚ雂H?r$嶿@"庍?棹杵Nn糠蔳?蟍R．齅>??!?O?}?=:3Y掾c?规悞?AFs>萲N
+`軰s-楞9]韀BO雄??^?やh.C毺+跓Z獾l╳Q吐W$??;?2c?%搪╬AE鼇侁囧8
+??剖+簧x;鎆XはK=桂遢旇[6? e!霆fj盪d樔蒾??褭韅唻期?怲喦?k挚呶1?瀗-堆澉C趓	"\緂ZPk@盾f嚁€}L蕖パ7驲m?燓?
+rp拿?慛蛘_P$粽N?苫7?A
+鮎%f+d??海鶱嵻{Q{??,?	?糙G~??*W肶S菺?觱韷蚣萚孱€/%-罻8~rr妗X蛰?6
+\謎A爹?跭i锸
+n Cnb hMQ?錺4)^惍槮桋繥<畅?@e?S梡吐骥!淿杦:蚏`昽&??蠳;?4聦&)嵸ΤF?W钛懖袋!詻k<頏夀??S?淾}?蘼 懫諅辂]wA? ?O棡D簅柏~,y檃煕	f?恐YIU厑?邼LG?e纇攽睇点?Bc
+-覩滉,﨩繫J/洨鼝? "E牸l5峙? ?y｀靍鯰€怆?w釫/盉硝踶a
+iL詢?<勫呋y?2$疩騦岻揷冇迨
+?)渘撧s?镺?攖鰕陋|泿qJV     *
+
+?篌 ?€P  唬S
+蹦g?    YZ
